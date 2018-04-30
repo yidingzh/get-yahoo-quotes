@@ -17,23 +17,24 @@
 ##
 ## ----------------------------------------------------------------------------------------------------
 
+function log () {
+  # To remove logging comment echo statement and uncoment the :
+  # echo $1
+  :
+}
+
 SYMBOL=$1
 if [[ -z $SYMBOL ]]; then
   echo "Please enter a SYMBOL as the first parameter to this script"
   exit
 fi
-echo "Downloading quotes for $SYMBOL"
+log "Downloading quotes for $SYMBOL"
 
-function log () {
-  # To remove logging comment echo statement and uncoment the :
-  echo $1
-  # :
-}
 
 # Period values are 'Seconds since 1970-01-01 00:00:00 UTC'. Also known as Unix time or epoch time.
 # Let's just assume we want it all and ask for a date range that starts at 1/1/1970.
 # NOTE: This doesn't work for old synbols like IBM which has Yahoo has back to 1962
-START_DATE=0
+START_DATE=$(date -v-1w -u +%s)
 END_DATE=$(date +%s)
 
 # Store the cookie in a temp file
@@ -72,7 +73,4 @@ log $BASE_URL
 URL="$BASE_URL&crumb=$crumb"
 log "URL: $URL"
 
-# Download to 
-curl -s --cookie $cookieJar  $URL > $SYMBOL.csv
-
-echo "Data dowmloaded to $SYMBOL.csv"
+printf "$SYMBOL:%.2f" $(curl -s --cookie $cookieJar  $URL | tail -n 1 | cut -d',' -f6)
